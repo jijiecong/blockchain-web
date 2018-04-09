@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<tools>
+<toolbox scope="application">
+    <tool key="pageUtil" class="com.meiren.common.utils.PageUtil" />
+    <tool key="paginator" class="com.meiren.common.utils.Paginator"/>
+    <tool key="mathTool" class="org.apache.velocity.tools.generic.MathTool"/>
+    <tool key="stringUtil" class="com.meiren.common.utils.StringUtils"/>
+    <tool key="dateUtils" class="com.meiren.common.utils.DateUtils"/>
+    <tool key="vmUtils" class="com.meiren.common.utils.VmUtils"/>
+</toolbox>
+</tools>

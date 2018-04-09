@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.meiren.dao.DiskBlockIndexDAO" >
+<resultMap id="getBlockChain_RM" type="com.meiren.dataobject.DiskBlockIndexDO">
+	
+					<id column="blockHash" property="block_hash"/>
+			
+					<result property="nFile" column="n_file"/>
+			
+					<result property="nBlockPos" column="n_block_pos"/>
+
+					<result property="nHeight" column="n_height"/>
+
+					<result property="nextHash" column="next_hash"/>
+
+					<result property="version" column="version"/>
+			
+					<result property="prevHash" column="prev_hash"/>
+			
+					<result property="merkleHash" column="merkle_hash"/>
+
+					<result property="timestamp" column="timestamp"/>
+
+					<result property="bits" column="bits"/>
+
+					<result property="nonce" column="nonce"/>
+				
+</resultMap>
+
+<!-- 所有字段 -->
+<sql id="All_DiskBlockIndex_Fields">
+			            block_hash,
+			            n_file,
+			            n_block_pos,
+			            n_height,
+			            next_hash,
+			            version,
+			            prev_hash,
+			            merkle_hash,
+			            timestamp,
+			            bits,
+			            nonce
+		
+</sql>
+
+<insert id="create" useGeneratedKeys="true" keyColumn="block_hash" keyProperty="block_hash" parameterType="com.meiren.dataobject.DiskBlockIndexDO" >
+	INSERT INTO disk_block_index (
+											block_hash,
+								n_file,
+								n_block_pos,
+								n_height,
+								next_hash,
+								version,
+								prev_hash,
+								merkle_hash,
+								timestamp,
+								bits,
+								nonce
+				)
+	VALUES (
+											#{blockHash},
+								#{nFile},
+								#{nBlockPos},
+								#{nHeight},
+								#{nextHash},
+								#{version},
+								#{prevHash},
+								#{merkleHash},
+							  	#{timestamp},
+							  	#{bits},
+							  	#{nonce}
+				)
+</insert>
+
+<select id="findByBlockHash" resultType="com.meiren.dataobject.DiskBlockIndexDO" parameterType="String">
+	select <include refid="All_DiskBlockIndex_Fields"/>
+	from disk_block_index
+    WHERE block_hash = #{blockHash}
+</select>
+
+	<select id="getLastestBlockIndex" resultType="com.meiren.dataobject.DiskBlockIndexDO" >
+		select <include refid="All_DiskBlockIndex_Fields"/>
+		from disk_block_index order by n_height desc limit 1
+	</select>
+
+	<update id="modifyByBlockHash" parameterType="java.util.HashMap">
+		UPDATE disk_block_index
+		SET next_hash = #{nextHash}
+		WHERE block_hash = #{blockHash}
+	</update>
+
+	<select id="getMaxnFile" resultType="int">
+		SELECT IFNULL(MAX(n_file),0) FROM disk_block_index
+	</select>
+
+	<select id="findByPrevBlockHash" resultType="com.meiren.dataobject.DiskBlockIndexDO" parameterType="String">
+		select <include refid="All_DiskBlockIndex_Fields"/>
+		from disk_block_index
+		WHERE prev_hash = #{prevHash}
+	</select>
+
+	<select id="findByNextBlockHash" resultType="com.meiren.dataobject.DiskBlockIndexDO" parameterType="String">
+		select <include refid="All_DiskBlockIndex_Fields"/>
+		from disk_block_index
+		WHERE next_hash = #{nextHash}
+	</select>
+
+	<select id="searchDiskBlockIndex" resultType="com.meiren.dataobject.DiskBlockIndexDO" parameterType="java.util.Map">
+		select <include refid="All_DiskBlockIndex_Fields"/>
+		from disk_block_index
+		order by n_height desc
+		LIMIT 0, 10
+	</select>
+</mapper>

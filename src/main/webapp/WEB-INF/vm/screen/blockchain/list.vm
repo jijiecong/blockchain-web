@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="refresh" content="10">
+</head>
+<body onload="">
+<h2>Hello World!</h2>
+
+    #foreach( $elem in $blockchainData)
+        <h3><a onclick="go($elem.blockHash)">$elem.blockHash</a>   生成时间： $elem.timestamp</h3>
+    #end
+</body>
+
+<script>
+    function go(var1, var2) {
+        window.open("/blockchain/detail/"+blockHash);
+    }
+
+</script>
+
+</html>
