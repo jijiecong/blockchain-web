@@ -3,8 +3,23 @@
 <body>
 <h2>Hello World!</h2>
 
-    #foreach( $elem in $storeData)
-        <h3>$elem</h3>
+    #foreach( $elem in $transactionData)
+        <div style="float: left;">
+            输入：
+            #foreach($input in $elem.txInVOS)
+                <h3>输入所在交易hash:$input.txHash</h3>
+                <h3>输入所在交易中的index:$input.outIndex</h3>
+            #end
+        </div>
+        <div style="float: right;">
+            输出：
+            #foreach($output in $elem.txOutVOS)
+                <h3>商家：$output.merchant</h3>
+                <h3>接收者：$output.receiver</h3>
+                <h3>数量：$output.value</h3>
+                <hr/>
+            #end
+        </div>
     #end
 </body>
 

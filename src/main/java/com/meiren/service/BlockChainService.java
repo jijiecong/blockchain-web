@@ -9,6 +9,7 @@ import com.meiren.dataobject.DiskBlockIndexDO;
 import com.meiren.vo.DiskBlockIndexVO;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.List;
 
@@ -34,30 +35,33 @@ public class BlockChainService {
 	}
 
 	public Block readFromDisk(String blockHash) {
-		int begin = 0;
-		int end = 0;
-		DiskBlockIndexDO diskBlockIndexDO_cur = diskBlockIndexDAO.findByBlockHash(blockHash);
-		DiskBlockIndexDO diskBlockIndexDO_prev = diskBlockIndexDAO.findByNextBlockHash(blockHash);
-		if(diskBlockIndexDO_prev == null || diskBlockIndexDO_cur.nFile != diskBlockIndexDO_prev.nFile){//第一个block获取block在新的dat文件的第一个
-			begin = 0;
-			end = diskBlockIndexDO_cur.nBlockPos;
-		}else {
-			begin = diskBlockIndexDO_prev.nBlockPos;
-			end = diskBlockIndexDO_cur.nBlockPos;
-		}
+		DiskBlockIndexDO diskBlockIndexDO = diskBlockIndexDAO.findByBlockHash(blockHash);
+		return readFromDiskBySize(diskBlockIndexDO.getnFile(), diskBlockIndexDO.getnBlockPos(), diskBlockIndexDO.getnBlockSize());
+	}
+
+	public Block readFromDiskBySize(int nFile, int begin, int size){
 		String pathBlk = pathDisk;
-		byte[] blockdata = BlockChainFileUtils.readFiletoByteArray(pathBlk+ blockFilePrefix +diskBlockIndexDO_cur.nFile+blockFileExtension);
-		byte[] result = new byte[end - begin];
-		System.arraycopy(blockdata, begin, result, 0, end - begin);
-		BlockChainInput input = new BlockChainInput(result);
 		Block block = null;
+		FileInputStream fis = null;
 		try {
+			fis = new FileInputStream(pathBlk+ blockFilePrefix +nFile+blockFileExtension);
+			fis.skip(begin);
+			byte[] result = new byte[size];
+			fis.read(result);
+			BlockChainInput input = new BlockChainInput(result);
 			block = new Block(input);
 		} catch (IOException e) {
 			e.printStackTrace();
+		}finally {
+			try {
+				if(fis != null)
+					fis.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
-		JsonUtils.printJson(block);
+		//		JsonUtils.printJson(block);
 		return block;
-
 	}
+
 }

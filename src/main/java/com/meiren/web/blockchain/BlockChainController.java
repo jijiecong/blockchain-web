@@ -1,13 +1,12 @@
 package com.meiren.web.blockchain;
 
-import com.meiren.blockchain.entity.Block;
-import com.meiren.blockchain.entity.Store;
+import com.meiren.blockchain.common.util.HashUtils;
+import com.meiren.blockchain.entity.*;
 import com.meiren.common.core.bind.annotation.FormModel;
 import com.meiren.common.utils.DateUtils;
 import com.meiren.dataobject.DiskBlockIndexDO;
 import com.meiren.service.BlockChainService;
-import com.meiren.vo.DiskBlockIndexVO;
-import com.meiren.vo.Student;
+import com.meiren.vo.*;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -54,11 +53,48 @@ public class BlockChainController {
 		ModelAndView modelAndView = new ModelAndView();
 		modelAndView.setViewName("blockchain/detail");
 		Block block = blockChainService.readFromDisk(blockHash);
-		List<String> storeList = new ArrayList<>();
-		for(Store store: block.stores){
-			storeList.add(new String(store.storeScript));
+		List<TransactionVO> transactionList = new ArrayList<>();
+		for(Transaction transaction: block.transactions){
+			TransactionVO transactionVO = new TransactionVO();
+			TxInVO[] txInVOS = new TxInVO[(int) transaction.getTxInCount()];
+			TxOutVO[] txOutVOS = new TxOutVO[(int) transaction.getTxOutCount()];
+			for (TxIn txIn: transaction.tx_ins){
+				String txHash = HashUtils.toHexStringAsLittleEndian(txIn.hash);
+				TxInVO txInVO = new TxInVO();
+				txInVO.setTxHash(txHash);
+				txInVO.setOutIndex(txIn.index);
+				txInVOS[(int) txIn.index] = txInVO;
+//				txInVO.setMerchant();
+//				txInVO.setOwner();
+//				txInVO.setValue();
+			}
+			int count = 0;
+			for (TxOut txOut: transaction.tx_outs){
+				TxOutVO txOutVO = new TxOutVO();
+				txOutVO.setTxHash(HashUtils.toHexStringAsLittleEndian(transaction.getTxHash()));
+				txOutVO.setOutIndex(count);
+				txOutVO.setMerchant(new String(txOut.merchantHash));
+				txOutVO.setReceiver(new String(txOut.receiver));
+				txOutVO.setValue(txOut.value);
+				txOutVOS[count] = txOutVO;
+				count++;
+
+			}
+			transactionVO.setTxInVOS(txInVOS);
+			transactionVO.setTxOutVOS(txOutVOS);
+			transactionVO.setOperator(new String(transaction.operatorHash));
+			transactionVO.setTxHash(HashUtils.toHexStringAsLittleEndian(transaction.getTxHash()));
+			transactionList.add(transactionVO);
 		}
-		modelAndView.addObject("storeData", storeList);
+		modelAndView.addObject("transactionData", transactionList);
+		return modelAndView;
+	}
+
+	@RequestMapping("uxto/{receiver}")
+	public ModelAndView uxtoByReceiver(@PathVariable String receiver){
+		ModelAndView modelAndView = new ModelAndView();
+		modelAndView.setViewName("blockchain/uxto");
+
 		return modelAndView;
 	}
 
